@@ -17,6 +17,7 @@ async function createExercise(page: Page) {
   await page.locator('input[type="file"]').setInputFiles(image)
   await page.getByLabel('Название').fill('Приседания')
   await page.getByRole('button', { name: 'Сохранить упражнение' }).click()
+  await expect(page).toHaveURL(/\/exercises$/)
 }
 
 test('creates, views, edits, and deletes a workout template', async ({
@@ -66,6 +67,7 @@ test('prevents deleting an exercise used by a workout template', async ({
   await page.getByRole('button', { name: 'Добавить' }).click()
   await page.getByLabel('Упражнение').selectOption({ label: 'Приседания' })
   await page.getByRole('button', { name: 'Сохранить шаблон' }).click()
+  await expect(page).toHaveURL(/\/workout-templates$/)
 
   await page.goto(`${appBasePath}/exercises`)
   await page.getByRole('link', { name: /Приседания/ }).click()

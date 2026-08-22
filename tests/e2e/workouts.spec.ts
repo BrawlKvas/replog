@@ -15,6 +15,7 @@ async function createExercise(page: Page, name: string) {
   await page.locator('input[type="file"]').setInputFiles(image)
   await page.getByLabel('Название').fill(name)
   await page.getByRole('button', { name: 'Сохранить упражнение' }).click()
+  await expect(page).toHaveURL(/\/exercises$/)
 }
 
 async function createTemplate(
@@ -37,6 +38,7 @@ async function createTemplate(
   }
 
   await page.getByRole('button', { name: 'Сохранить шаблон' }).click()
+  await expect(page).toHaveURL(/\/workout-templates$/)
 }
 
 async function fillResult(page: Page, weight: string) {
