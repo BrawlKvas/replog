@@ -219,6 +219,24 @@ export async function restoreBackup(json: string): Promise<void> {
   )
 }
 
+export async function resetAppData(): Promise<void> {
+  await db.transaction(
+    'rw',
+    db.metadata,
+    db.exercises,
+    db.workoutTemplates,
+    db.workouts,
+    async () => {
+      await Promise.all([
+        db.metadata.clear(),
+        db.exercises.clear(),
+        db.workoutTemplates.clear(),
+        db.workouts.clear(),
+      ])
+    },
+  )
+}
+
 export async function getLastBackupAt(): Promise<string | undefined> {
   return (await db.metadata.get(LAST_BACKUP_AT_METADATA_ID))?.value
 }

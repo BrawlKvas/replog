@@ -1,17 +1,18 @@
-import { ArrowLeft, Download, Upload, X } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Download, Upload, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   createBackup,
   createBackupFilename,
   getLastBackupAt,
+  resetAppData,
   restoreBackup,
   setLastBackupAt as persistLastBackupAt,
 } from '../shared/lib/backup'
 
-type Operation = 'exporting' | 'importing' | undefined
+type Operation = 'exporting' | 'importing' | 'resetting' | undefined
 
 function formatBackupDate(createdAt?: string): string {
   if (!createdAt) return 'Резервных копий ещё не создавали'
@@ -20,12 +21,14 @@ function formatBackupDate(createdAt?: string): string {
 }
 
 export function BackupPage() {
+  const navigate = useNavigate()
   const [lastBackupAt, setLastBackupAt] = useState<string>()
   const [selectedFile, setSelectedFile] = useState<File>()
   const [operation, setOperation] = useState<Operation>()
   const [error, setError] = useState<string>()
   const [success, setSuccess] = useState<string>()
   const [isRestoreDialogOpen, setIsRestoreDialogOpen] = useState(false)
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -81,6 +84,21 @@ export function BackupPage() {
           : 'Не удалось восстановить данные.',
       )
     } finally {
+      setOperation(undefined)
+    }
+  }
+
+  const handleReset = async () => {
+    setIsResetDialogOpen(false)
+    setOperation('resetting')
+    setError(undefined)
+    setSuccess(undefined)
+
+    try {
+      await resetAppData()
+      navigate('/', { replace: true })
+    } catch {
+      setError('Не удалось очистить данные. Попробуйте ещё раз.')
       setOperation(undefined)
     }
   }
@@ -177,6 +195,24 @@ export function BackupPage() {
         </button>
       </section>
 
+      <section className="mt-5 rounded-2xl border border-[#edc6c1] bg-[#fff8f7] p-5">
+        <h2 className="font-bold text-[#8e1c13]">Очистить приложение</h2>
+        <p className="mt-2 text-sm leading-6 text-[#657067]">
+          Удалите все упражнения, фотографии, шаблоны, тренировки и сведения о
+          резервных копиях с этого устройства. Установленное приложение и
+          офлайн-режим сохранятся.
+        </p>
+        <button
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-[#b42318] px-5 py-3 font-bold text-[#b42318] disabled:cursor-wait disabled:opacity-70"
+          type="button"
+          onClick={() => setIsResetDialogOpen(true)}
+          disabled={operation !== undefined}
+        >
+          <AlertTriangle aria-hidden="true" size={18} />
+          Очистить все данные
+        </button>
+      </section>
+
       <div className="mt-5" aria-live="polite">
         {error && (
           <p className="rounded-xl bg-[#fce8e6] p-4 text-sm text-[#b42318]">
@@ -231,6 +267,53 @@ export function BackupPage() {
                 onClick={() => void handleRestore()}
               >
                 Восстановить
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {isResetDialogOpen && (
+        <div className="fixed inset-0 z-10 grid place-items-center bg-[#152019]/45 p-5">
+          <section
+            className="w-full max-w-sm rounded-2xl bg-[#f5f5ef] p-6 shadow-xl"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="reset-title"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 id="reset-title" className="text-xl font-black">
+                  Очистить все данные?
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-[#657067]">
+                  Это действие нельзя отменить. Сначала сохраните резервную
+                  копию, если данные могут понадобиться позже.
+                </p>
+              </div>
+              <button
+                className="text-[#526056]"
+                type="button"
+                onClick={() => setIsResetDialogOpen(false)}
+                aria-label="Закрыть диалог"
+              >
+                <X aria-hidden="true" size={20} />
+              </button>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                className="rounded-xl border border-[#cdd5c8] px-4 py-3 font-bold text-[#173d2a]"
+                type="button"
+                onClick={() => setIsResetDialogOpen(false)}
+              >
+                Отмена
+              </button>
+              <button
+                className="rounded-xl bg-[#b42318] px-4 py-3 font-bold text-white"
+                type="button"
+                onClick={() => void handleReset()}
+              >
+                Очистить
               </button>
             </div>
           </section>
