@@ -1,4 +1,4 @@
-import { Database, Dumbbell, Download, ListChecks } from 'lucide-react'
+import { Dumbbell, ListChecks } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../db/database'
@@ -34,64 +34,29 @@ export function HomePage() {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col px-5 py-6 sm:px-8">
-      <header className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-xl bg-[#173d2a] text-[#d9ee8c]">
-            <Dumbbell aria-hidden="true" size={21} strokeWidth={2.5} />
-          </div>
-          <span className="text-lg font-bold tracking-tight">Replog</span>
+      <header className="flex items-center gap-3">
+        <div className="grid size-10 place-items-center rounded-xl bg-[#173d2a] text-[#d9ee8c]">
+          <Dumbbell aria-hidden="true" size={21} strokeWidth={2.5} />
         </div>
-        <span className="rounded-full border border-[#d8ddd1] px-3 py-1 text-xs font-medium text-[#526056]">
-          Лично
-        </span>
+        <span className="text-lg font-bold tracking-tight">Replog</span>
       </header>
 
-      <section className="my-auto py-16">
-        <p className="mb-4 text-sm font-semibold tracking-[0.16em] text-[#537441] uppercase">
-          Дневник тренировок
-        </p>
-        <h1 className="max-w-md text-4xl leading-[1.04] font-black tracking-[-0.05em] text-[#152019] sm:text-6xl">
-          Тренировки остаются твоими.
-        </h1>
-        <p className="mt-6 max-w-md text-base leading-7 text-[#5b675d] sm:text-lg">
-          Replog работает без аккаунта и интернета. Все записи хранятся только
-          на этом устройстве.
-        </p>
-
-        <div className="mt-10 grid gap-3 sm:grid-cols-2">
-          <article className="rounded-2xl border border-[#dce1d5] bg-white/60 p-5">
-            <Database className="text-[#537441]" aria-hidden="true" size={21} />
-            <h2 className="mt-5 font-bold">На устройстве</h2>
-            <p className="mt-1 text-sm leading-6 text-[#657067]">
-              Источник данных — IndexedDB в браузере.
-            </p>
-          </article>
-          <article className="rounded-2xl border border-[#dce1d5] bg-white/60 p-5">
-            <Download className="text-[#537441]" aria-hidden="true" size={21} />
-            <h2 className="mt-5 font-bold">Под твоим контролем</h2>
-            <p className="mt-1 text-sm leading-6 text-[#657067]">
-              Резервные копии будут выгружаться в JSON-файл.
-            </p>
-          </article>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:flex">
-          <Link
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white sm:w-auto"
-            to="/exercises"
-          >
-            <Dumbbell aria-hidden="true" size={19} />
-            Открыть упражнения
-          </Link>
-          <Link
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a] sm:w-auto"
-            to="/workout-templates"
-          >
-            <ListChecks aria-hidden="true" size={19} />
-            Шаблоны тренировок
-          </Link>
-        </div>
-      </section>
+      <nav className="my-auto grid gap-3 py-16" aria-label="Разделы приложения">
+        <Link
+          className="flex items-center gap-3 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white"
+          to="/exercises"
+        >
+          <Dumbbell aria-hidden="true" size={19} />
+          Упражнения
+        </Link>
+        <Link
+          className="flex items-center gap-3 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a]"
+          to="/workout-templates"
+        >
+          <ListChecks aria-hidden="true" size={19} />
+          Шаблоны тренировок
+        </Link>
+      </nav>
 
       <footer className="flex items-center gap-2 text-sm text-[#657067]">
         <span

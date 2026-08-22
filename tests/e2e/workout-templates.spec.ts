@@ -12,7 +12,7 @@ const appBasePath = process.env.GITHUB_ACTIONS === 'true' ? '/replog' : ''
 
 async function createExercise(page: Page) {
   await page.goto('/')
-  await page.getByRole('link', { name: 'Открыть упражнения' }).click()
+  await page.getByRole('link', { name: 'Упражнения' }).click()
   await page.getByRole('link', { name: 'Добавить упражнение' }).last().click()
   await page.locator('input[type="file"]').setInputFiles(image)
   await page.getByLabel('Название').fill('Приседания')

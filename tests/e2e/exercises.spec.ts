@@ -12,7 +12,7 @@ const appBasePath = process.env.GITHUB_ACTIONS === 'true' ? '/replog' : ''
 
 test('creates, edits, and deletes an exercise', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('link', { name: 'Открыть упражнения' }).click()
+  await page.getByRole('link', { name: 'Упражнения' }).click()
   await expect(page).toHaveURL(/\/exercises$/)
   await page.getByRole('link', { name: 'Добавить упражнение' }).last().click()
   await expect(page).toHaveURL(/\/exercises\/new$/)
