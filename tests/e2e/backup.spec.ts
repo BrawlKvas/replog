@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test'
 
+const appBasePath = process.env.GITHUB_ACTIONS === 'true' ? '/replog' : ''
+
 test('downloads an empty backup and records its creation date', async ({
   page,
 }) => {
-  await page.goto('/backup')
+  await page.goto(`${appBasePath}/backup`)
 
   await expect(page.getByTestId('last-backup-at')).toContainText(
     'Резервных копий',
