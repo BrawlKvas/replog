@@ -10,9 +10,14 @@ import {
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { db } from '../db/database'
 import type { Exercise } from '../entities/exercise'
+import type { WorkoutTemplate } from '../entities/workout-template'
 import { ExerciseForm } from '../features/exercises/ExerciseForm'
 import { ExerciseListPage } from '../features/exercises/ExerciseListPage'
 import type { ExerciseInput } from '../features/exercises/exercise-form'
+import { WorkoutTemplateDetailPage } from '../features/workout-templates/WorkoutTemplateDetailPage'
+import { WorkoutTemplateForm } from '../features/workout-templates/WorkoutTemplateForm'
+import { WorkoutTemplateListPage } from '../features/workout-templates/WorkoutTemplateListPage'
+import type { WorkoutTemplateInput } from '../features/workout-templates/workout-template-form'
 import { HomePage } from '../pages/HomePage'
 
 function createExercise(values: ExerciseInput, image: Blob): Exercise {
@@ -23,6 +28,17 @@ function createExercise(values: ExerciseInput, image: Blob): Exercise {
     image,
     description: values.description || undefined,
     tags: values.tags,
+    createdAt: now,
+    updatedAt: now,
+  }
+}
+
+function createWorkoutTemplate(values: WorkoutTemplateInput): WorkoutTemplate {
+  const now = new Date().toISOString()
+  return {
+    id: crypto.randomUUID(),
+    name: values.name,
+    exercises: values.exercises,
     createdAt: now,
     updatedAt: now,
   }
@@ -107,6 +123,20 @@ function EditExercisePage() {
       exercise={exercise}
       onBack={() => navigate('/exercises')}
       onDelete={async () => {
+        const templateUsingExercise = await db.workoutTemplates
+          .filter((template) =>
+            template.exercises.some(
+              (templateExercise) => templateExercise.exerciseId === exercise.id,
+            ),
+          )
+          .first()
+
+        if (templateUsingExercise) {
+          throw new Error(
+            'Упражнение используется в шаблонах тренировок. Сначала удалите его из шаблонов.',
+          )
+        }
+
         await db.exercises.delete(exercise.id)
         navigate('/exercises', { replace: true })
       }}
@@ -122,6 +152,134 @@ function EditExercisePage() {
         navigate('/exercises', { replace: true })
       }}
     />
+  )
+}
+
+function CreateWorkoutTemplatePage() {
+  const navigate = useNavigate()
+  const [exercises, setExercises] = useState<Exercise[]>()
+  const [loadError, setLoadError] = useState(false)
+
+  useEffect(() => {
+    void db.exercises
+      .orderBy('name')
+      .toArray()
+      .then(setExercises)
+      .catch(() => setLoadError(true))
+  }, [])
+
+  if (loadError) {
+    return <TemplateLoadError />
+  }
+
+  if (!exercises) {
+    return <TemplateLoading />
+  }
+
+  return (
+    <WorkoutTemplateForm
+      exercises={exercises}
+      onBack={() => navigate('/workout-templates')}
+      onSave={async (values) => {
+        await db.workoutTemplates.add(createWorkoutTemplate(values))
+        navigate('/workout-templates', { replace: true })
+      }}
+    />
+  )
+}
+
+function EditWorkoutTemplatePage() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const [template, setTemplate] = useState<WorkoutTemplate>()
+  const [exercises, setExercises] = useState<Exercise[]>()
+  const [loadState, setLoadState] = useState<
+    'error' | 'loading' | 'missing' | 'ready'
+  >('loading')
+
+  useEffect(() => {
+    if (!id) return
+
+    void Promise.all([
+      db.workoutTemplates.get(id),
+      db.exercises.orderBy('name').toArray(),
+    ])
+      .then(([storedTemplate, storedExercises]) => {
+        if (!storedTemplate) {
+          setLoadState('missing')
+          return
+        }
+
+        setTemplate(storedTemplate)
+        setExercises(storedExercises)
+        setLoadState('ready')
+      })
+      .catch(() => setLoadState('error'))
+  }, [id])
+
+  if (loadState === 'loading') {
+    return <TemplateLoading />
+  }
+
+  if (loadState === 'error') {
+    return <TemplateLoadError />
+  }
+
+  if (loadState === 'missing' || !template || !exercises) {
+    return (
+      <main className="mx-auto w-full max-w-xl px-5 py-6 sm:px-8">
+        <h1 className="text-2xl font-black">Шаблон тренировки не найден</h1>
+        <Link
+          className="mt-4 inline-block font-bold text-[#173d2a]"
+          to="/workout-templates"
+        >
+          Вернуться к шаблонам тренировок
+        </Link>
+      </main>
+    )
+  }
+
+  return (
+    <WorkoutTemplateForm
+      exercises={exercises}
+      template={template}
+      onBack={() => navigate(`/workout-templates/${template.id}`)}
+      onDelete={async () => {
+        await db.workoutTemplates.delete(template.id)
+        navigate('/workout-templates', { replace: true })
+      }}
+      onSave={async (values) => {
+        await db.workoutTemplates.put({
+          ...template,
+          name: values.name,
+          exercises: values.exercises,
+          updatedAt: new Date().toISOString(),
+        })
+        navigate(`/workout-templates/${template.id}`, { replace: true })
+      }}
+    />
+  )
+}
+
+function TemplateLoading() {
+  return (
+    <main className="mx-auto w-full max-w-xl px-5 py-6 text-[#657067] sm:px-8">
+      Загружаем шаблон тренировки...
+    </main>
+  )
+}
+
+function TemplateLoadError() {
+  return (
+    <main className="mx-auto w-full max-w-xl px-5 py-6 sm:px-8">
+      <h1 className="text-2xl font-black">Не удалось загрузить шаблон</h1>
+      <Link
+        className="mt-4 inline-block font-bold text-[#173d2a]"
+        to="/workout-templates"
+      >
+        Вернуться к шаблонам тренировок
+      </Link>
+    </main>
   )
 }
 
@@ -147,6 +305,22 @@ function App() {
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/exercises/new" element={<CreateExercisePage />} />
           <Route path="/exercises/:id" element={<EditExercisePage />} />
+          <Route
+            path="/workout-templates"
+            element={<WorkoutTemplateListPage />}
+          />
+          <Route
+            path="/workout-templates/new"
+            element={<CreateWorkoutTemplatePage />}
+          />
+          <Route
+            path="/workout-templates/:id/edit"
+            element={<EditWorkoutTemplatePage />}
+          />
+          <Route
+            path="/workout-templates/:id"
+            element={<WorkoutTemplateDetailPage />}
+          />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>

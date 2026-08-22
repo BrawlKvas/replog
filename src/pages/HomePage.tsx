@@ -1,4 +1,4 @@
-import { Database, Dumbbell, Download } from 'lucide-react'
+import { Database, Dumbbell, Download, ListChecks } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../db/database'
@@ -75,13 +75,22 @@ export function HomePage() {
           </article>
         </div>
 
-        <Link
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white sm:w-auto"
-          to="/exercises"
-        >
-          <Dumbbell aria-hidden="true" size={19} />
-          Открыть упражнения
-        </Link>
+        <div className="mt-6 grid gap-3 sm:flex">
+          <Link
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white sm:w-auto"
+            to="/exercises"
+          >
+            <Dumbbell aria-hidden="true" size={19} />
+            Открыть упражнения
+          </Link>
+          <Link
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a] sm:w-auto"
+            to="/workout-templates"
+          >
+            <ListChecks aria-hidden="true" size={19} />
+            Шаблоны тренировок
+          </Link>
+        </div>
       </section>
 
       <footer className="flex items-center gap-2 text-sm text-[#657067]">

@@ -106,8 +106,12 @@ export function ExerciseForm({
     setIsDeleting(true)
     try {
       await onDelete()
-    } catch {
-      setSubmitError('Не удалось удалить упражнение. Попробуйте ещё раз.')
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось удалить упражнение. Попробуйте ещё раз.',
+      )
       setIsDeleting(false)
       setIsDeleteDialogOpen(false)
     }
