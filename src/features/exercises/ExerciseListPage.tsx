@@ -81,7 +81,7 @@ export function ExerciseListPage() {
               Добавьте упражнение с фотографией, чтобы собрать свою библиотеку.
             </p>
             <Link
-              className="mt-6 rounded-xl bg-[#173d2a] px-5 py-3 font-bold text-white"
+              className="mt-6 inline-block rounded-xl bg-[#173d2a] px-5 py-3 font-bold text-white"
               to="/exercises/new"
             >
               Добавить упражнение
