@@ -1,5 +1,6 @@
 import { Database, Dumbbell, Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { db } from '../db/database'
 
 type StorageStatus = 'checking' | 'ready' | 'unavailable'
@@ -73,6 +74,14 @@ export function HomePage() {
             </p>
           </article>
         </div>
+
+        <Link
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white sm:w-auto"
+          to="/exercises"
+        >
+          <Dumbbell aria-hidden="true" size={19} />
+          Открыть упражнения
+        </Link>
       </section>
 
       <footer className="flex items-center gap-2 text-sm text-[#657067]">
