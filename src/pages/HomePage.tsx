@@ -1,4 +1,4 @@
-import { Dumbbell, ListChecks } from 'lucide-react'
+import { Dumbbell, ListChecks, Play } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../db/database'
@@ -13,15 +13,23 @@ const storageCopy: Record<StorageStatus, string> = {
 
 export function HomePage() {
   const [storageStatus, setStorageStatus] = useState<StorageStatus>('checking')
+  const [activeWorkoutId, setActiveWorkoutId] = useState<string>()
 
   useEffect(() => {
     let isMounted = true
 
     void db
       .open()
-      .then(() => {
+      .then(async () => {
         void navigator.storage?.persist?.()
-        if (isMounted) setStorageStatus('ready')
+        const activeWorkout = await db.workouts
+          .where('status')
+          .equals('active')
+          .first()
+        if (isMounted) {
+          setActiveWorkoutId(activeWorkout?.id)
+          setStorageStatus('ready')
+        }
       })
       .catch(() => {
         if (isMounted) setStorageStatus('unavailable')
@@ -42,6 +50,15 @@ export function HomePage() {
       </header>
 
       <nav className="my-auto grid gap-3 py-16" aria-label="Разделы приложения">
+        {activeWorkoutId && (
+          <Link
+            className="flex items-center gap-3 rounded-xl bg-[#6d943f] px-5 py-4 font-bold text-white"
+            to={`/workouts/${activeWorkoutId}`}
+          >
+            <Play aria-hidden="true" size={19} fill="currentColor" />
+            Продолжить тренировку
+          </Link>
+        )}
         <Link
           className="flex items-center gap-3 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white"
           to="/exercises"

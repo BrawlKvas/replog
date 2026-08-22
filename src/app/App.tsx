@@ -14,6 +14,9 @@ import type { WorkoutTemplate } from '../entities/workout-template'
 import { ExerciseForm } from '../features/exercises/ExerciseForm'
 import { ExerciseListPage } from '../features/exercises/ExerciseListPage'
 import type { ExerciseInput } from '../features/exercises/exercise-form'
+import { WorkoutEditorPage } from '../features/workouts/WorkoutEditorPage'
+import { WorkoutPage } from '../features/workouts/WorkoutPage'
+import { WorkoutSummaryPage } from '../features/workouts/WorkoutSummaryPage'
 import { WorkoutTemplateDetailPage } from '../features/workout-templates/WorkoutTemplateDetailPage'
 import { WorkoutTemplateForm } from '../features/workout-templates/WorkoutTemplateForm'
 import { WorkoutTemplateListPage } from '../features/workout-templates/WorkoutTemplateListPage'
@@ -134,6 +137,22 @@ function EditExercisePage() {
         if (templateUsingExercise) {
           throw new Error(
             'Упражнение используется в шаблонах тренировок. Сначала удалите его из шаблонов.',
+          )
+        }
+
+        const activeWorkoutUsingExercise = await db.workouts
+          .where('status')
+          .equals('active')
+          .filter((workout) =>
+            workout.exercises.some(
+              (workoutExercise) => workoutExercise.exerciseId === exercise.id,
+            ),
+          )
+          .first()
+
+        if (activeWorkoutUsingExercise) {
+          throw new Error(
+            'Упражнение используется в текущей тренировке. Сначала отмените тренировку или замените упражнение.',
           )
         }
 
@@ -320,6 +339,12 @@ function App() {
           <Route
             path="/workout-templates/:id"
             element={<WorkoutTemplateDetailPage />}
+          />
+          <Route path="/workouts/:id" element={<WorkoutPage />} />
+          <Route path="/workouts/:id/edit" element={<WorkoutEditorPage />} />
+          <Route
+            path="/workouts/:id/summary"
+            element={<WorkoutSummaryPage />}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
