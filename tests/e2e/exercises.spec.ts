@@ -8,6 +8,8 @@ const image = {
   ),
 }
 
+const appBasePath = process.env.GITHUB_ACTIONS === 'true' ? '/replog' : ''
+
 test('creates, edits, and deletes an exercise', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('link', { name: 'Открыть упражнения' }).click()
@@ -63,7 +65,7 @@ test('creates, edits, and deletes an exercise', async ({ page }) => {
 })
 
 test('shows a missing exercise route', async ({ page }) => {
-  await page.goto('/exercises/missing')
+  await page.goto(`${appBasePath}/exercises/missing`)
 
   await expect(
     page.getByRole('heading', { name: 'Упражнение не найдено' }),
