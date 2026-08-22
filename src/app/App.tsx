@@ -15,12 +15,14 @@ import { ExerciseForm } from '../features/exercises/ExerciseForm'
 import { ExerciseListPage } from '../features/exercises/ExerciseListPage'
 import type { ExerciseInput } from '../features/exercises/exercise-form'
 import { WorkoutEditorPage } from '../features/workouts/WorkoutEditorPage'
+import { WorkoutHistoryPage } from '../features/workouts/WorkoutHistoryPage'
 import { WorkoutPage } from '../features/workouts/WorkoutPage'
 import { WorkoutSummaryPage } from '../features/workouts/WorkoutSummaryPage'
 import { WorkoutTemplateDetailPage } from '../features/workout-templates/WorkoutTemplateDetailPage'
 import { WorkoutTemplateForm } from '../features/workout-templates/WorkoutTemplateForm'
 import { WorkoutTemplateListPage } from '../features/workout-templates/WorkoutTemplateListPage'
 import type { WorkoutTemplateInput } from '../features/workout-templates/workout-template-form'
+import { BackupPage } from '../pages/BackupPage'
 import { HomePage } from '../pages/HomePage'
 
 function createExercise(values: ExerciseInput, image: Blob): Exercise {
@@ -321,6 +323,7 @@ function App() {
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/backup" element={<BackupPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/exercises/new" element={<CreateExercisePage />} />
           <Route path="/exercises/:id" element={<EditExercisePage />} />
@@ -341,6 +344,7 @@ function App() {
             element={<WorkoutTemplateDetailPage />}
           />
           <Route path="/workouts/:id" element={<WorkoutPage />} />
+          <Route path="/workouts/history" element={<WorkoutHistoryPage />} />
           <Route path="/workouts/:id/edit" element={<WorkoutEditorPage />} />
           <Route
             path="/workouts/:id/summary"

@@ -115,6 +115,12 @@ export function WorkoutSummaryPage() {
       >
         К шаблонам тренировок
       </Link>
+      <Link
+        className="mt-4 block text-center text-sm font-bold text-[#173d2a]"
+        to="/workouts/history"
+      >
+        К истории тренировок
+      </Link>
     </main>
   )
 }

@@ -1,7 +1,10 @@
-import { Dumbbell, ListChecks, Play } from 'lucide-react'
+import { Archive, Dumbbell, History, ListChecks, Play } from 'lucide-react'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../db/database'
+import { getLastBackupAt } from '../shared/lib/backup'
 
 type StorageStatus = 'checking' | 'ready' | 'unavailable'
 
@@ -14,6 +17,7 @@ const storageCopy: Record<StorageStatus, string> = {
 export function HomePage() {
   const [storageStatus, setStorageStatus] = useState<StorageStatus>('checking')
   const [activeWorkoutId, setActiveWorkoutId] = useState<string>()
+  const [lastBackupAt, setLastBackupAt] = useState<string>()
 
   useEffect(() => {
     let isMounted = true
@@ -22,12 +26,13 @@ export function HomePage() {
       .open()
       .then(async () => {
         void navigator.storage?.persist?.()
-        const activeWorkout = await db.workouts
-          .where('status')
-          .equals('active')
-          .first()
+        const [activeWorkout, storedLastBackupAt] = await Promise.all([
+          db.workouts.where('status').equals('active').first(),
+          getLastBackupAt(),
+        ])
         if (isMounted) {
           setActiveWorkoutId(activeWorkout?.id)
+          setLastBackupAt(storedLastBackupAt)
           setStorageStatus('ready')
         }
       })
@@ -60,6 +65,13 @@ export function HomePage() {
           </Link>
         )}
         <Link
+          className="flex items-center gap-3 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a]"
+          to="/workouts/history"
+        >
+          <History aria-hidden="true" size={19} />
+          История тренировок
+        </Link>
+        <Link
           className="flex items-center gap-3 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white"
           to="/exercises"
         >
@@ -73,14 +85,28 @@ export function HomePage() {
           <ListChecks aria-hidden="true" size={19} />
           Шаблоны тренировок
         </Link>
+        <Link
+          className="flex items-center gap-3 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a]"
+          to="/backup"
+        >
+          <Archive aria-hidden="true" size={19} />
+          Резервная копия
+        </Link>
       </nav>
 
-      <footer className="flex items-center gap-2 text-sm text-[#657067]">
-        <span
-          className={`size-2 rounded-full ${storageStatus === 'ready' ? 'bg-[#6d943f]' : 'bg-[#d7a13d]'}`}
-          aria-hidden="true"
-        />
-        <span data-testid="storage-status">{storageCopy[storageStatus]}</span>
+      <footer className="space-y-2 text-sm text-[#657067]">
+        <div className="flex items-center gap-2">
+          <span
+            className={`size-2 rounded-full ${storageStatus === 'ready' ? 'bg-[#6d943f]' : 'bg-[#d7a13d]'}`}
+            aria-hidden="true"
+          />
+          <span data-testid="storage-status">{storageCopy[storageStatus]}</span>
+        </div>
+        <p data-testid="home-last-backup-at">
+          {lastBackupAt
+            ? `Последняя копия: ${format(new Date(lastBackupAt), 'd MMMM yyyy, HH:mm', { locale: ru })}`
+            : 'Резервных копий ещё не создавали'}
+        </p>
       </footer>
     </main>
   )

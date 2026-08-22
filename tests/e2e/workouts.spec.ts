@@ -85,6 +85,31 @@ test('shows an active workout on the home screen', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Приседания' })).toBeVisible()
 })
 
+test('shows completed workouts in history', async ({ page }) => {
+  await createExercise(page, 'Приседания')
+  await createTemplate(page, 'День ног', [{ name: 'Приседания', sets: 1 }])
+
+  await page.getByRole('button', { name: 'Начать тренировку' }).click()
+  await fillResult(page, '80')
+  await page.getByRole('button', { name: 'Завершить' }).click()
+  await page.goto('/')
+
+  await page.getByRole('link', { name: 'История тренировок' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'История тренировок' }),
+  ).toBeVisible()
+  await expect(page.getByRole('link', { name: /День ног/ })).toContainText(
+    '1 упражн., 1 подходов',
+  )
+
+  await page.getByRole('link', { name: /День ног/ }).click()
+  await expect(page.getByText('Тренировка завершена')).toBeVisible()
+  await page.getByRole('link', { name: 'К истории тренировок' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'История тренировок' }),
+  ).toBeVisible()
+})
+
 test('edits and cancels an active workout without changing its template', async ({
   page,
 }) => {
