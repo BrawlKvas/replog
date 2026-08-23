@@ -56,6 +56,7 @@ test('conducts a workout, saves the result, and shows it next time', async ({
 
   await page.getByRole('button', { name: 'Начать тренировку' }).click()
   await expect(page.getByRole('heading', { name: 'Приседания' })).toBeVisible()
+  await expect(page.locator('img')).toBeVisible()
   await expect(page.getByText('Нет данных')).toBeVisible()
 
   await fillResult(page, '80')

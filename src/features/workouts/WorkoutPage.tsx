@@ -1,5 +1,5 @@
 import { ArrowLeft, Settings } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
 import {
@@ -15,6 +15,26 @@ type ResultField = keyof WorkoutSetResult
 
 function formatResult(result: WorkoutSetResult) {
   return `${result.weight} кг x ${result.repetitions}, RIR ${result.rir}, техника ${result.technique}/10`
+}
+
+function ExerciseThumbnail({ image }: { image: Blob }) {
+  const imageRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const url = URL.createObjectURL(image)
+
+    if (imageRef.current) imageRef.current.src = url
+
+    return () => URL.revokeObjectURL(url)
+  }, [image])
+
+  return (
+    <img
+      ref={imageRef}
+      className="size-20 shrink-0 rounded-2xl object-cover"
+      alt=""
+    />
+  )
 }
 
 export function WorkoutPage() {
@@ -248,9 +268,12 @@ export function WorkoutPage() {
           Упражнение {workout.currentExerciseIndex + 1} из{' '}
           {workout.exercises.length}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.04em]">
-          {exercise?.name ?? 'Упражнение удалено'}
-        </h1>
+        <div className="mt-2 flex items-center gap-4">
+          <h1 className="min-w-0 flex-1 text-3xl font-black tracking-[-0.04em]">
+            {exercise?.name ?? 'Упражнение удалено'}
+          </h1>
+          {exercise && <ExerciseThumbnail image={exercise.image} />}
+        </div>
         <p className="mt-3 text-lg text-[#657067]">
           Подход {workout.currentSetIndex + 1} из {currentExercise.sets.length}
         </p>
