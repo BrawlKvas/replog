@@ -94,6 +94,9 @@ test('shows completed workouts in history', async ({ page }) => {
   await fillResult(page, '80')
   await page.getByRole('button', { name: 'Завершить' }).click()
   await page.goto('/')
+  await expect(page.getByTestId('storage-status')).toContainText(
+    'Локальное хранилище готово',
+  )
 
   await page.getByRole('link', { name: 'История тренировок' }).click()
   await expect(
