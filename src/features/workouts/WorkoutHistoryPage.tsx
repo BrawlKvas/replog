@@ -4,7 +4,7 @@ import { ru } from 'date-fns/locale'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../../db/database'
-import type { Workout } from '../../entities/workout'
+import { formatWorkoutDuration, type Workout } from '../../entities/workout'
 import type { WorkoutTemplate } from '../../entities/workout-template'
 
 type LoadState = 'error' | 'loading' | 'ready'
@@ -114,7 +114,11 @@ export function WorkoutHistoryPage() {
                     </span>
                     <span className="mt-1 block text-sm text-[#657067]">
                       {workout.exercises.length} упражн.,{' '}
-                      {getSetsCount(workout)} подходов
+                      {getSetsCount(workout)} подходов,{' '}
+                      {formatWorkoutDuration(
+                        workout.startedAt,
+                        workout.completedAt,
+                      )}
                     </span>
                   </Link>
                 </li>

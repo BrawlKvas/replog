@@ -49,6 +49,28 @@ export function createWorkout(template: WorkoutTemplate): Workout {
   }
 }
 
+export function formatWorkoutDuration(
+  startedAt: string,
+  endedAt?: string,
+): string {
+  const elapsedMilliseconds = Math.max(
+    0,
+    new Date(endedAt ?? new Date().toISOString()).getTime() -
+      new Date(startedAt).getTime(),
+  )
+  const elapsedMinutes = Math.floor(elapsedMilliseconds / 60_000)
+
+  if (elapsedMinutes === 0) return 'меньше минуты'
+
+  const hours = Math.floor(elapsedMinutes / 60)
+  const minutes = elapsedMinutes % 60
+
+  if (hours === 0) return `${minutes} мин`
+  if (minutes === 0) return `${hours} ч`
+
+  return `${hours} ч ${minutes} мин`
+}
+
 export function isWorkoutSetComplete(result: WorkoutSetResult): boolean {
   return (
     typeof result.weight === 'number' &&

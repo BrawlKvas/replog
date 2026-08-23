@@ -3,7 +3,11 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
 import type { Exercise } from '../../entities/exercise'
-import type { Workout, WorkoutSetResult } from '../../entities/workout'
+import {
+  formatWorkoutDuration,
+  type Workout,
+  type WorkoutSetResult,
+} from '../../entities/workout'
 
 function formatResult(result: WorkoutSetResult) {
   return `${result.weight} кг x ${result.repetitions}, RIR ${result.rir}, техника ${result.technique}/10`
@@ -86,6 +90,13 @@ export function WorkoutSummaryPage() {
           Отличная работа
         </h1>
       </header>
+
+      <section className="mt-8 rounded-2xl bg-[#e8efdf] p-4 text-center">
+        <h2 className="text-sm font-bold text-[#456236]">Время тренировки</h2>
+        <p className="mt-1 text-2xl font-black text-[#173d2a]">
+          {formatWorkoutDuration(workout.startedAt, workout.completedAt)}
+        </p>
+      </section>
 
       <section className="mt-10 space-y-5">
         {workout.exercises.map((workoutExercise) => (

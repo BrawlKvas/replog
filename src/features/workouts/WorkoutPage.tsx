@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
 import {
+  formatWorkoutDuration,
   getPreviousWorkoutSet,
   isWorkoutSetComplete,
   type Workout,
@@ -45,6 +46,8 @@ export function WorkoutPage() {
   const [completedWorkouts, setCompletedWorkouts] = useState<Workout[]>([])
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [saveError, setSaveError] = useState('')
+  const [currentTime, setCurrentTime] = useState(() => new Date().toISOString())
+  const isActiveWorkout = workout?.status === 'active'
 
   useEffect(() => {
     if (!id) return
@@ -82,6 +85,16 @@ export function WorkoutPage() {
       isMounted = false
     }
   }, [id])
+
+  useEffect(() => {
+    if (!isActiveWorkout) return
+
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(new Date().toISOString())
+    }, 1_000)
+
+    return () => window.clearInterval(intervalId)
+  }, [isActiveWorkout])
 
   if (loadState === 'loading') {
     return (
@@ -263,7 +276,14 @@ export function WorkoutPage() {
         </Link>
       </header>
 
-      <section className="mt-10">
+      <section className="mt-6 rounded-2xl bg-[#e8efdf] p-4">
+        <h2 className="text-sm font-bold text-[#456236]">Время тренировки</h2>
+        <p className="mt-1 text-xl font-black text-[#173d2a]">
+          {formatWorkoutDuration(workout.startedAt, currentTime)}
+        </p>
+      </section>
+
+      <section className="mt-8">
         <p className="text-sm font-semibold tracking-[0.16em] text-[#537441] uppercase">
           Упражнение {workout.currentExerciseIndex + 1} из{' '}
           {workout.exercises.length}

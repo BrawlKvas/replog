@@ -56,6 +56,8 @@ test('conducts a workout, saves the result, and shows it next time', async ({
 
   await page.getByRole('button', { name: 'Начать тренировку' }).click()
   await expect(page.getByRole('heading', { name: 'Приседания' })).toBeVisible()
+  await expect(page.getByText('Время тренировки')).toBeVisible()
+  await expect(page.getByText('меньше минуты')).toBeVisible()
   await expect(page.locator('img')).toBeVisible()
   await expect(page.getByText('Нет данных')).toBeVisible()
 
@@ -65,6 +67,8 @@ test('conducts a workout, saves the result, and shows it next time', async ({
   await fillResult(page, '75')
   await page.getByRole('button', { name: 'Завершить' }).click()
   await expect(page.getByText('Тренировка завершена')).toBeVisible()
+  await expect(page.getByText('Время тренировки')).toBeVisible()
+  await expect(page.getByText('меньше минуты')).toBeVisible()
   await expect(page.getByText(/80 кг x 8, RIR 2, техника 8\/10/)).toBeVisible()
 
   await page.getByRole('link', { name: 'К шаблонам тренировок' }).click()
@@ -104,7 +108,7 @@ test('shows completed workouts in history', async ({ page }) => {
     page.getByRole('heading', { name: 'История тренировок' }),
   ).toBeVisible()
   await expect(page.getByRole('link', { name: /День ног/ })).toContainText(
-    '1 упражн., 1 подходов',
+    '1 упражн., 1 подходов, меньше минуты',
   )
 
   await page.getByRole('link', { name: /День ног/ }).click()

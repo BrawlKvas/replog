@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatWorkoutDuration,
   getPreviousWorkoutSet,
   isWorkoutSetComplete,
   type Workout,
@@ -38,6 +39,38 @@ describe('isWorkoutSetComplete', () => {
       false,
     )
     expect(isWorkoutSetComplete({ ...completeSet, rir: null })).toBe(false)
+  })
+})
+
+describe('formatWorkoutDuration', () => {
+  it('formats elapsed time without rounding up partial minutes', () => {
+    expect(
+      formatWorkoutDuration(
+        '2026-08-22T10:00:00.000Z',
+        '2026-08-22T10:00:59.999Z',
+      ),
+    ).toBe('меньше минуты')
+    expect(
+      formatWorkoutDuration(
+        '2026-08-22T10:00:00.000Z',
+        '2026-08-22T10:45:00.000Z',
+      ),
+    ).toBe('45 мин')
+  })
+
+  it('formats hours and remaining minutes', () => {
+    expect(
+      formatWorkoutDuration(
+        '2026-08-22T10:00:00.000Z',
+        '2026-08-22T11:23:00.000Z',
+      ),
+    ).toBe('1 ч 23 мин')
+    expect(
+      formatWorkoutDuration(
+        '2026-08-22T10:00:00.000Z',
+        '2026-08-22T11:00:00.000Z',
+      ),
+    ).toBe('1 ч')
   })
 })
 
