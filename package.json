@@ -29,7 +29,9 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.86.0",
+    "react-is": "^19.2.0",
     "react-router-dom": "^7.18.2",
+    "recharts": "^3.10.1",
     "vite-plugin-pwa": "^1.3.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.15"
@@ -40,6 +42,7 @@
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/react-is": "^19",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
     "prettier": "^3.9.6",

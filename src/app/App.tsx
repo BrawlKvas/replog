@@ -23,6 +23,7 @@ import { WorkoutTemplateForm } from '../features/workout-templates/WorkoutTempla
 import { WorkoutTemplateListPage } from '../features/workout-templates/WorkoutTemplateListPage'
 import type { WorkoutTemplateInput } from '../features/workout-templates/workout-template-form'
 import { BackupPage } from '../pages/BackupPage'
+import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { HomePage } from '../pages/HomePage'
 
 function createExercise(values: ExerciseInput, image: Blob): Exercise {
@@ -323,6 +324,7 @@ function App() {
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/backup" element={<BackupPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/exercises/new" element={<CreateExercisePage />} />

@@ -1,4 +1,11 @@
-import { Archive, Dumbbell, History, ListChecks, Play } from 'lucide-react'
+import {
+  Archive,
+  BarChart3,
+  Dumbbell,
+  History,
+  ListChecks,
+  Play,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useEffect, useState } from 'react'
@@ -64,6 +71,13 @@ export function HomePage() {
             Продолжить тренировку
           </Link>
         )}
+        <Link
+          className="flex items-center gap-3 rounded-xl bg-[#173d2a] px-5 py-4 font-bold text-white"
+          to="/analytics"
+        >
+          <BarChart3 aria-hidden="true" size={19} />
+          Аналитика
+        </Link>
         <Link
           className="flex items-center gap-3 rounded-xl border border-[#173d2a] bg-white px-5 py-4 font-bold text-[#173d2a]"
           to="/workouts/history"
