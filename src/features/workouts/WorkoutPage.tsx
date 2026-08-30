@@ -5,7 +5,7 @@ import { db } from '../../db/database'
 import {
   formatWorkoutDuration,
   getPreviousWorkoutSet,
-  isWorkoutSetComplete,
+  isWorkoutComplete,
   type Workout,
   type WorkoutSetResult,
 } from '../../entities/workout'
@@ -220,11 +220,6 @@ export function WorkoutPage() {
   }
 
   const goNext = async () => {
-    if (!isWorkoutSetComplete(currentResult)) {
-      setSaveError('Заполните вес, повторения, RIR и оценку техники.')
-      return
-    }
-
     setSaveError('')
     const isLastSet =
       workout.currentSetIndex === currentExercise.sets.length - 1
@@ -233,6 +228,13 @@ export function WorkoutPage() {
 
     try {
       if (isLastSet && isLastExercise) {
+        if (!isWorkoutComplete(workout)) {
+          setSaveError(
+            'Заполните все поля во всех подходах, чтобы завершить тренировку.',
+          )
+          return
+        }
+
         const completedWorkout: Workout = {
           ...workout,
           status: 'completed',

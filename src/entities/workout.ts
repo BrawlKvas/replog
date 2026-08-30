@@ -86,6 +86,12 @@ export function isWorkoutSetComplete(result: WorkoutSetResult): boolean {
   )
 }
 
+export function isWorkoutComplete(workout: Workout): boolean {
+  return workout.exercises.every((exercise) =>
+    exercise.sets.every(isWorkoutSetComplete),
+  )
+}
+
 export function getPreviousWorkoutSet(
   workouts: Workout[],
   exerciseId: string,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatWorkoutDuration,
   getPreviousWorkoutSet,
+  isWorkoutComplete,
   isWorkoutSetComplete,
   type Workout,
   type WorkoutSetResult,
@@ -39,6 +40,31 @@ describe('isWorkoutSetComplete', () => {
       false,
     )
     expect(isWorkoutSetComplete({ ...completeSet, rir: null })).toBe(false)
+  })
+})
+
+describe('isWorkoutComplete', () => {
+  it('requires every set in every exercise to be complete', () => {
+    const workout = createCompletedWorkout(
+      'workout',
+      '2026-08-22T10:00:00.000Z',
+      [completeSet, completeSet],
+    )
+
+    expect(isWorkoutComplete(workout)).toBe(true)
+    expect(
+      isWorkoutComplete({
+        ...workout,
+        exercises: [
+          ...workout.exercises,
+          {
+            id: 'deadlift',
+            exerciseId: 'deadlift',
+            sets: [{ ...completeSet, repetitions: null }],
+          },
+        ],
+      }),
+    ).toBe(false)
   })
 })
 

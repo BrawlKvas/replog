@@ -76,6 +76,33 @@ test('conducts a workout, saves the result, and shows it next time', async ({
   await expect(page.getByText('80 кг x 8, RIR 2, техника 8/10')).toBeVisible()
 })
 
+test('allows moving past an incomplete set but requires all sets to finish', async ({
+  page,
+}) => {
+  await createExercise(page, 'Приседания')
+  await createTemplate(page, 'День ног', [{ name: 'Приседания', sets: 2 }])
+
+  await page.getByRole('button', { name: 'Начать тренировку' }).click()
+  await page.getByRole('button', { name: 'Далее' }).click()
+  await expect(page.getByText('Подход 2 из 2')).toBeVisible()
+  await fillResult(page, '75')
+  await page.getByRole('button', { name: 'Завершить' }).click()
+  await expect(
+    page
+      .getByRole('alert')
+      .getByText(
+        'Заполните все поля во всех подходах, чтобы завершить тренировку.',
+      ),
+  ).toBeVisible()
+  await expect(page.getByText('Подход 2 из 2')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Назад' }).click()
+  await fillResult(page, '80')
+  await page.getByRole('button', { name: 'Далее' }).click()
+  await page.getByRole('button', { name: 'Завершить' }).click()
+  await expect(page.getByText('Тренировка завершена')).toBeVisible()
+})
+
 test('shows an active workout on the home screen', async ({ page }) => {
   await createExercise(page, 'Приседания')
   await createTemplate(page, 'День ног', [{ name: 'Приседания', sets: 1 }])
