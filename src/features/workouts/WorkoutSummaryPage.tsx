@@ -1,6 +1,6 @@
 import { CheckCircle2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
 import type { Exercise } from '../../entities/exercise'
 import {
@@ -15,11 +15,16 @@ function formatResult(result: WorkoutSetResult) {
 
 export function WorkoutSummaryPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [workout, setWorkout] = useState<Workout>()
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [loadState, setLoadState] = useState<
     'error' | 'loading' | 'missing' | 'ready'
   >('loading')
+  const [deleteError, setDeleteError] = useState('')
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
+    useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -74,6 +79,20 @@ export function WorkoutSummaryPage() {
   const exerciseById = new Map(
     exercises.map((exercise) => [exercise.id, exercise]),
   )
+
+  const deleteWorkout = async () => {
+    setIsDeleting(true)
+    setDeleteError('')
+    try {
+      await db.workouts.delete(workout.id)
+      navigate('/workouts/history', { replace: true })
+    } catch {
+      setDeleteError('Не удалось удалить тренировку. Попробуйте ещё раз.')
+      setIsDeleteConfirmationOpen(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <main className="mx-auto min-h-svh w-full max-w-xl px-5 py-6 sm:px-8">
@@ -132,6 +151,55 @@ export function WorkoutSummaryPage() {
       >
         К истории тренировок
       </Link>
+      {deleteError && (
+        <p className="mt-4 text-sm text-[#b42318]" role="alert">
+          {deleteError}
+        </p>
+      )}
+      <button
+        className="mt-6 w-full rounded-xl px-5 py-3 font-bold text-[#b42318]"
+        type="button"
+        onClick={() => setIsDeleteConfirmationOpen(true)}
+      >
+        Удалить тренировку
+      </button>
+
+      {isDeleteConfirmationOpen && (
+        <div className="fixed inset-0 z-10 grid place-items-center bg-[#152019]/45 p-5">
+          <section
+            className="w-full max-w-sm rounded-2xl bg-[#f5f5ef] p-6 shadow-xl"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-workout-title"
+          >
+            <h2 id="delete-workout-title" className="text-xl font-black">
+              Удалить тренировку?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#657067]">
+              Тренировка и все её результаты будут безвозвратно удалены с этого
+              устройства.
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                className="rounded-xl border border-[#cdd5c8] bg-white px-4 py-3 font-bold"
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setIsDeleteConfirmationOpen(false)}
+              >
+                Назад
+              </button>
+              <button
+                className="rounded-xl bg-[#b42318] px-4 py-3 font-bold text-white disabled:opacity-70"
+                type="button"
+                disabled={isDeleting}
+                onClick={() => void deleteWorkout()}
+              >
+                {isDeleting ? 'Удаляем...' : 'Удалить'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   )
 }

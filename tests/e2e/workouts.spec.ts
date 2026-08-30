@@ -119,6 +119,29 @@ test('shows completed workouts in history', async ({ page }) => {
   ).toBeVisible()
 })
 
+test('deletes a completed workout from history', async ({ page }) => {
+  await createExercise(page, 'Приседания')
+  await createTemplate(page, 'День ног', [{ name: 'Приседания', sets: 1 }])
+
+  await page.getByRole('button', { name: 'Начать тренировку' }).click()
+  await fillResult(page, '80')
+  await page.getByRole('button', { name: 'Завершить' }).click()
+  await expect(page.getByText('Тренировка завершена')).toBeVisible()
+
+  await page.goto('/')
+  await page.getByRole('link', { name: 'История тренировок' }).click()
+  await page.getByRole('link', { name: /День ног/ }).click()
+  await page.getByRole('button', { name: 'Удалить тренировку' }).click()
+  await expect(page.getByRole('alertdialog')).toBeVisible()
+  await page
+    .getByRole('alertdialog')
+    .getByRole('button', { name: 'Удалить' })
+    .click()
+
+  await expect(page).toHaveURL(/\/workouts\/history$/)
+  await expect(page.getByText('Тренировок пока нет')).toBeVisible()
+})
+
 test('edits and cancels an active workout without changing its template', async ({
   page,
 }) => {
