@@ -11,6 +11,7 @@ test('opens the Replog home screen', async ({ page }) => {
     page.getByRole('link', { name: 'Резервная копия' }),
   ).toBeVisible()
   await expect(page.getByRole('link', { name: 'Аналитика' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Вес тела' })).toBeVisible()
   await expect(page.getByTestId('home-last-backup-at')).toContainText(
     'Резервных копий',
   )

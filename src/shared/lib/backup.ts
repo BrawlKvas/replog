@@ -1,11 +1,12 @@
 import { format } from 'date-fns'
 import { z } from 'zod'
 import { db } from '../../db/database'
+import type { BodyWeightEntry } from '../../entities/body-weight'
 import type { Exercise } from '../../entities/exercise'
 import type { Workout } from '../../entities/workout'
 import type { WorkoutTemplate } from '../../entities/workout-template'
 
-const BACKUP_FORMAT_VERSION = 1
+const BACKUP_FORMAT_VERSION = 2
 const LAST_BACKUP_AT_METADATA_ID = 'last-backup-at'
 
 const timestampSchema = z.string().datetime()
@@ -31,9 +32,8 @@ const workoutSetResultSchema = z.object({
   technique: z.number().finite().nullable(),
 })
 
-const backupSchema = z.object({
+const backupBaseSchema = z.object({
   format: z.literal('replog-backup'),
-  version: z.literal(BACKUP_FORMAT_VERSION),
   createdAt: timestampSchema,
   exercises: z.array(backupExerciseSchema),
   workoutTemplates: z.array(
@@ -76,6 +76,21 @@ const backupSchema = z.object({
   ),
 })
 
+const backupSchema = z.discriminatedUnion('version', [
+  backupBaseSchema.extend({ version: z.literal(1) }),
+  backupBaseSchema.extend({
+    version: z.literal(BACKUP_FORMAT_VERSION),
+    bodyWeights: z.array(
+      z.object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        weight: z.number().finite().positive(),
+        createdAt: timestampSchema,
+        updatedAt: timestampSchema,
+      }),
+    ),
+  }),
+])
+
 type BackupFile = z.infer<typeof backupSchema>
 
 export type BackupSnapshot = {
@@ -83,6 +98,7 @@ export type BackupSnapshot = {
   exercises: Exercise[]
   workoutTemplates: WorkoutTemplate[]
   workouts: Workout[]
+  bodyWeights: BodyWeightEntry[]
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -146,6 +162,7 @@ export async function serializeBackup(
     exercises: await Promise.all(snapshot.exercises.map(serializeExercise)),
     workoutTemplates: snapshot.workoutTemplates,
     workouts: snapshot.workouts,
+    bodyWeights: snapshot.bodyWeights,
   }
 
   return JSON.stringify(backup)
@@ -173,6 +190,10 @@ export async function parseBackup(json: string): Promise<BackupSnapshot> {
     ),
     workoutTemplates: validation.data.workoutTemplates,
     workouts: validation.data.workouts,
+    bodyWeights:
+      validation.data.version === BACKUP_FORMAT_VERSION
+        ? validation.data.bodyWeights
+        : [],
   }
 }
 
@@ -181,11 +202,13 @@ export async function createBackup(): Promise<{
   json: string
 }> {
   const createdAt = new Date()
-  const [exercises, workoutTemplates, workouts] = await Promise.all([
-    db.exercises.toArray(),
-    db.workoutTemplates.toArray(),
-    db.workouts.toArray(),
-  ])
+  const [exercises, workoutTemplates, workouts, bodyWeights] =
+    await Promise.all([
+      db.exercises.toArray(),
+      db.workoutTemplates.toArray(),
+      db.workouts.toArray(),
+      db.bodyWeights.toArray(),
+    ])
 
   return {
     createdAt,
@@ -194,6 +217,7 @@ export async function createBackup(): Promise<{
       exercises,
       workoutTemplates,
       workouts,
+      bodyWeights,
     }),
   }
 }
@@ -206,15 +230,18 @@ export async function restoreBackup(json: string): Promise<void> {
     db.exercises,
     db.workoutTemplates,
     db.workouts,
+    db.bodyWeights,
     async () => {
       await Promise.all([
         db.exercises.clear(),
         db.workoutTemplates.clear(),
         db.workouts.clear(),
+        db.bodyWeights.clear(),
       ])
       await db.exercises.bulkAdd(backup.exercises)
       await db.workoutTemplates.bulkAdd(backup.workoutTemplates)
       await db.workouts.bulkAdd(backup.workouts)
+      await db.bodyWeights.bulkAdd(backup.bodyWeights)
     },
   )
 }
@@ -226,12 +253,14 @@ export async function resetAppData(): Promise<void> {
     db.exercises,
     db.workoutTemplates,
     db.workouts,
+    db.bodyWeights,
     async () => {
       await Promise.all([
         db.metadata.clear(),
         db.exercises.clear(),
         db.workoutTemplates.clear(),
         db.workouts.clear(),
+        db.bodyWeights.clear(),
       ])
     },
   )

@@ -25,6 +25,7 @@ import type { WorkoutTemplateInput } from '../features/workout-templates/workout
 import { BackupPage } from '../pages/BackupPage'
 import { AnalyticsPage } from '../pages/AnalyticsPage'
 import { HomePage } from '../pages/HomePage'
+import { BodyWeightPage } from '../features/body-weight/BodyWeightPage'
 
 function createExercise(values: ExerciseInput, image: Blob): Exercise {
   const now = new Date().toISOString()
@@ -325,6 +326,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/body-weight" element={<BodyWeightPage />} />
           <Route path="/backup" element={<BackupPage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/exercises/new" element={<CreateExercisePage />} />

@@ -54,6 +54,14 @@ describe('backup serialization', () => {
         completedAt: '2026-08-22T10:30:00.000Z',
       },
     ],
+    bodyWeights: [
+      {
+        date: '2026-08-22',
+        weight: 76.5,
+        createdAt: '2026-08-22T10:30:00.000Z',
+        updatedAt: '2026-08-22T10:30:00.000Z',
+      },
+    ],
   }
 
   it('round-trips all data including exercise images', async () => {
@@ -62,6 +70,7 @@ describe('backup serialization', () => {
     expect(backup.createdAt).toBe(snapshot.createdAt)
     expect(backup.workoutTemplates).toEqual(snapshot.workoutTemplates)
     expect(backup.workouts).toEqual(snapshot.workouts)
+    expect(backup.bodyWeights).toEqual(snapshot.bodyWeights)
     expect(backup.exercises[0]).toMatchObject({
       ...snapshot.exercises[0],
       image: expect.any(Blob),
@@ -72,9 +81,22 @@ describe('backup serialization', () => {
     expect(backup.exercises[0].image.type).toBe('image/webp')
   })
 
+  it('imports version 1 backups without body-weight entries', async () => {
+    const json = await serializeBackup(snapshot)
+    const versionOne = JSON.stringify({
+      ...JSON.parse(json),
+      version: 1,
+      bodyWeights: undefined,
+    })
+
+    await expect(parseBackup(versionOne)).resolves.toMatchObject({
+      bodyWeights: [],
+    })
+  })
+
   it('rejects unsupported backup versions before restoring data', async () => {
     const json = await serializeBackup(snapshot)
-    const incompatible = JSON.stringify({ ...JSON.parse(json), version: 2 })
+    const incompatible = JSON.stringify({ ...JSON.parse(json), version: 3 })
 
     await expect(parseBackup(incompatible)).rejects.toThrow(
       'Файл резервной копии имеет неподдерживаемый формат.',

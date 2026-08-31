@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
+import type { BodyWeightEntry } from '../entities/body-weight'
 import type { Exercise } from '../entities/exercise'
 import type { Workout } from '../entities/workout'
 import type { WorkoutTemplate } from '../entities/workout-template'
@@ -13,6 +14,7 @@ class ReplogDatabase extends Dexie {
   exercises!: EntityTable<Exercise, 'id'>
   workoutTemplates!: EntityTable<WorkoutTemplate, 'id'>
   workouts!: EntityTable<Workout, 'id'>
+  bodyWeights!: EntityTable<BodyWeightEntry, 'date'>
 
   constructor() {
     super('replog')
@@ -37,6 +39,14 @@ class ReplogDatabase extends Dexie {
       exercises: 'id, name, createdAt, *tags',
       workoutTemplates: 'id, name, createdAt',
       workouts: 'id, status, startedAt, completedAt, templateId',
+    })
+
+    this.version(5).stores({
+      metadata: 'id',
+      exercises: 'id, name, createdAt, *tags',
+      workoutTemplates: 'id, name, createdAt',
+      workouts: 'id, status, startedAt, completedAt, templateId',
+      bodyWeights: 'date',
     })
   }
 }
