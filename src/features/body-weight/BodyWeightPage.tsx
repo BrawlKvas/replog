@@ -26,7 +26,7 @@ type LoadState = 'error' | 'loading' | 'ready'
 
 function formatWeight(weight: number) {
   return new Intl.NumberFormat('ru-RU', {
-    maximumFractionDigits: 1,
+    maximumFractionDigits: 2,
   }).format(weight)
 }
 
@@ -183,7 +183,7 @@ export function BodyWeightPage() {
               className="mt-2 w-full rounded-xl border border-[#cdd5c8] bg-white px-4 py-3 outline-none focus:border-[#537441] focus:ring-2 focus:ring-[#d9ee8c]"
               inputMode="decimal"
               min="0.1"
-              step="0.1"
+              step="any"
               type="number"
               {...register('weight', { valueAsNumber: true })}
             />

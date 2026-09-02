@@ -7,9 +7,9 @@ test('records, updates, edits, and deletes body weight', async ({ page }) => {
   await expect(page).toHaveURL(/\/body-weight$/)
   await expect(page.getByText('Записей пока нет')).toBeVisible()
 
-  await page.getByLabel('Вес, кг').fill('76.5')
+  await page.getByLabel('Вес, кг').fill('87.55')
   await page.getByRole('button', { name: 'Сохранить вес' }).click()
-  await expect(page.getByText('76,5 кг').first()).toBeVisible()
+  await expect(page.getByText('87,55 кг').first()).toBeVisible()
 
   await page.getByLabel('Вес, кг').fill('76.1')
   await page.getByRole('button', { name: 'Сохранить вес' }).click()
